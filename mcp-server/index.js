@@ -152,6 +152,28 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 await fs.writeFile(writePath, args.content, "utf-8");
                 return { content: [{ type: "text", text: `File ${args.relative_path} aggiornato con successo.` }] };
 
+            case "api_lista_articoli":
+                const list = await joomlaApi("/content/articles");
+                const simplified = list.data.map(a => ({ id: a.id, title: a.attributes.title, state: a.attributes.state }));
+                return { content: [{ type: "text", text: JSON.stringify(simplified, null, 2) }] };
+
+            case "api_crea_articolo":
+                const newArt = await joomlaApi("/content/articles", "POST", {
+                    title: args.title,
+                    articletext: args.articletext,
+                    catid: args.catid,
+                    language: args.language,
+                    state: 1
+                });
+                return { content: [{ type: "text", text: `Articolo creato con successo! ID: ${newArt.data.id}` }] };
+
+            case "api_modifica_articolo":
+                await joomlaApi(`/content/articles/${args.id}`, "PATCH", {
+                    title: args.title,
+                    articletext: args.articletext
+                });
+                return { content: [{ type: "text", text: `Articolo ${args.id} aggiornato.` }] };
+
             default:
                 throw new Error("Tool non trovato");
         }
