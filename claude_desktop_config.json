@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "joomla-master": {
+      "command": "docker",
+      "args": ["exec", "-i", "joomla_mcp", "node", "index.js"]
+    }
+  }
+}
