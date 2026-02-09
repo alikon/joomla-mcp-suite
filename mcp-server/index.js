@@ -5,6 +5,15 @@ import mysql from "mysql2/promise";
 import fs from "fs/promises";
 import path from "path";
 
+const API_TOKEN = process.env.JOOMLA_API_TOKEN;
+const API_BASE = process.env.JOOMLA_API_BASE;
+const JOOMLA_ROOT = "/var/www/html";
+
+const server = new Server(
+    { name: "joomla-hybrid-mcp", version: "1.2.0" },
+    { capabilities: { tools: {} } }
+);
+
 const dbConfig = {
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -13,10 +22,26 @@ const dbConfig = {
     prefix: process.env.DB_PREFIX || "jos_"
 };
 
-const server = new Server(
-    { name: "joomla-full-access", version: "1.0.0" },
-    { capabilities: { tools: {} } }
-);
+// Helper per le chiamate API
+async function joomlaApi(endpoint, method = 'GET', body = null) {
+    const headers = {
+        'Authorization': `Bearer ${API_TOKEN}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/vnd.api+json'
+    };
+    const response = await fetch(`${API_BASE}${endpoint}`, {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : null
+    });
+    if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.errors?.[0]?.title || response.statusText);
+    }
+    return await response.json();
+}
+
+
 
 const pool = mysql.createPool(dbConfig);
 const JOOMLA_ROOT = "/var/www/html";
@@ -62,6 +87,40 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
                     content: { type: "string" }
                 },
                 required: ["relative_path", "content"]
+            }
+        },
+        ,
+        // --- NUOVI TOOLS (API WEB SERVICES) ---
+        {
+            name: "api_lista_articoli",
+            description: "Elenca articoli usando le API native (più sicuro del DB)",
+            inputSchema: { type: "object", properties: {} }
+        },
+        {
+            name: "api_crea_articolo",
+            description: "Crea un articolo tramite API (gestisce alias e categorie)",
+            inputSchema: {
+                type: "object",
+                properties: {
+                    title: { type: "string" },
+                    articletext: { type: "string" },
+                    catid: { type: "number", default: 2 },
+                    language: { type: "string", default: "*" }
+                },
+                required: ["title", "articletext"]
+            }
+        },
+        {
+            name: "api_modifica_articolo",
+            description: "Aggiorna il contenuto di un articolo esistente tramite ID",
+            inputSchema: {
+                type: "object",
+                properties: {
+                    id: { type: "string" },
+                    title: { type: "string" },
+                    articletext: { type: "string" }
+                },
+                required: ["id"]
             }
         }
     ]
