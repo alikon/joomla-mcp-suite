@@ -1,0 +1,42 @@
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: joomla_db
+      MYSQL_USER: joomla_user
+      MYSQL_PASSWORD: joomla_password
+
+  joomla:
+    image: joomla:latest
+    ports:
+      - "8080:80"
+    environment:
+      JOOMLA_DB_HOST: db
+      JOOMLA_DB_USER: joomla_user
+      JOOMLA_DB_PASSWORD: joomla_password
+      JOOMLA_DB_NAME: joomla_db
+    volumes:
+      - joomla_files:/var/www/html
+    depends_on:
+      - db
+
+  mcp-server:
+    build: 
+      context: ../mcp-server
+    environment:
+      DB_HOST: db
+      DB_USER: joomla_user
+      DB_PASSWORD: joomla_password
+      DB_NAME: joomla_db
+      DB_PREFIX: "joos_"
+      # In Codespaces, l'IA girerà localmente allo script, 
+      # quindi puntiamo all'host interno del container joomla.
+      JOOMLA_API_BASE: "http://joomla/api/index.php/v1"
+    volumes:
+      - joomla_files:/var/www/html
+    stdin_open: true
+    tty: true
+
+volumes:
+  joomla_files:
