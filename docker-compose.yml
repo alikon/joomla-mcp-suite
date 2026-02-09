@@ -36,7 +36,9 @@ services:
       DB_USER: joomla_user
       DB_PASSWORD: joomla_password
       DB_NAME: joomla_db
-      DB_PREFIX: "joos_" # Cambia in base a cosa scegli nell'installazione di Joomla
+      DB_PREFIX: "joos_"
+      JOOMLA_API_TOKEN: "IL_TUO_TOKEN_QUI" # Incolla qui il token generato
+      JOOMLA_API_BASE: "http://joomla/api/index.php/v1" # Host interno Docker
     volumes:
       - ./joomla_html:/var/www/html # Permette all'IA di leggere/scrivere file
     depends_on:
