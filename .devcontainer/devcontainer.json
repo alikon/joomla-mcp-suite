@@ -1,0 +1,14 @@
+{
+  "name": "Joomla MCP Development",
+  "dockerComposeFile": "docker-compose.yaml",
+  "service": "mcp-server",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "forwardPorts": [8080],
+  "portsAttributes": {
+    "8080": {
+      "label": "Sito Joomla",
+      "onAutoForward": "notify"
+    }
+  },
+  "postCreateCommand": "cd mcp-server && npm install"
+}
