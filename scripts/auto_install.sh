@@ -1,14 +1,27 @@
 #!/bin/bash
 
-# Aspetta qualche secondo che il DB sia pronto (metodo grezzo ma efficace)
-echo "⏳ Attendo che il Database si inizializzi..."
-sleep 15
+echo "🚀 Avvio script di inizializzazione Joomla..."
 
-# Controlla se Joomla è già installato (se esiste configuration.php)
+# Funzione per attendere il Database
+wait_for_db() {
+    echo "⏳ In attesa che il database ($JOOMLA_DB_HOST) sia pronto..."
+    
+    # Loop infinito finché la connessione non ha successo
+    until php -r "try { new PDO('mysql:host=$JOOMLA_DB_HOST', '$JOOMLA_DB_USER', '$JOOMLA_DB_PASSWORD'); echo 'OK'; } catch (PDOException \$e) { exit(1); }" > /dev/null 2>&1; do
+        echo "   ... DB non ancora raggiungibile, riprovo tra 3 secondi."
+        sleep 3
+    done
+    echo "✅ Database connesso!"
+}
+
+# 1. Aspetta il DB
+wait_for_db
+
+# 2. Controlla se Joomla è già installato
 if [ -f "/var/www/html/configuration.php" ]; then
     echo "✅ Joomla è già installato. Avvio Apache."
 else
-    echo "🚀 Inizio installazione automatica di Joomla..."
+    echo "⚙️  Joomla non trovato. Inizio installazione..."
 
     # Esegue l'installazione via CLI
     php /var/www/html/installation/joomla.php install \
@@ -25,12 +38,12 @@ else
 
     echo "✅ Installazione completata!"
 
-    # Rimuove la cartella di installazione (obbligatorio per sicurezza in Joomla)
+    # Rimuove la cartella di installazione
     if [ -d "/var/www/html/installation" ]; then
         echo "🗑️ Rimozione cartella installation..."
         rm -rf /var/www/html/installation
     fi
 fi
 
-# Avvia il processo principale di Apache (comando standard dell'immagine Joomla)
+# 3. Avvia Apache
 exec apache2-foreground
