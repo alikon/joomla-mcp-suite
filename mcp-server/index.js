@@ -44,7 +44,6 @@ async function joomlaApi(endpoint, method = 'GET', body = null) {
 
 
 const pool = mysql.createPool(dbConfig);
-const JOOMLA_ROOT = "/var/www/html";
 
 // 1. LISTA DEI TOOLS
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
