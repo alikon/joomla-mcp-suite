@@ -23,17 +23,17 @@ services:
 
   mcp-server:
     build: 
-      context: ../mcp-server
+      context: ..
+      dockerfile: mcp-server/Dockerfile # Assicurati che il Dockerfile sia qui
     environment:
       DB_HOST: db
       DB_USER: joomla_user
       DB_PASSWORD: joomla_password
       DB_NAME: joomla_db
       DB_PREFIX: "joos_"
-      # In Codespaces, l'IA girerà localmente allo script, 
-      # quindi puntiamo all'host interno del container joomla.
       JOOMLA_API_BASE: "http://joomla/api/index.php/v1"
     volumes:
+      - ..:/workspaces/${localWorkspaceFolderBasename}:cached
       - joomla_files:/var/www/html
     stdin_open: true
     tty: true
