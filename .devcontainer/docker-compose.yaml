@@ -18,8 +18,11 @@ services:
       JOOMLA_DB_NAME: joomla_db
     volumes:
       - joomla_files:/var/www/html
+      - ./scripts/auto_install.sh:/usr/local/bin/auto_install.sh
     depends_on:
       - db
+    entrypoint: ["bash", "/usr/local/bin/auto_install.sh"]
+    
 
   mcp-server:
     build: 
@@ -35,6 +38,7 @@ services:
     volumes:
       - ..:/workspaces/${localWorkspaceFolderBasename}:cached
       - joomla_files:/var/www/html
+    command: sleep infinity
     stdin_open: true
     tty: true
 
