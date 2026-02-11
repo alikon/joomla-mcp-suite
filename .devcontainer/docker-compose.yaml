@@ -6,7 +6,11 @@ services:
       MYSQL_DATABASE: joomla_db
       MYSQL_USER: joomla_user
       MYSQL_PASSWORD: joomla_password
-
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   joomla:
     image: joomla:latest
     ports:
@@ -20,7 +24,8 @@ services:
       - joomla_files:/var/www/html
       - ./scripts/auto_install.sh:/usr/local/bin/auto_install.sh
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     command: ["bash", "/usr/local/bin/auto_install.sh"]
 
   mcp-server:
