@@ -1,49 +1,23 @@
 #!/bin/bash
 
-echo "🚀 Avvio script di inizializzazione Joomla..."
+echo "⏳ Attendo il database..."
+until php -r "try { new PDO('mysql:host=db;dbname=joomla_db', 'joomla_user', 'joomla_password'); echo 'OK'; } catch (Exception \$e) { exit(1); }" > /dev/null 2>&1; do
+  sleep 2
+done
+echo "✅ Database pronto!"
 
-# Funzione per attendere il Database
-wait_for_db() {
-    echo "⏳ In attesa che il database ($JOOMLA_DB_HOST) sia pronto..."
-    
-    # Loop infinito finché la connessione non ha successo
-    until php -r "try { new PDO('mysql:host=$JOOMLA_DB_HOST', '$JOOMLA_DB_USER', '$JOOMLA_DB_PASSWORD'); echo 'OK'; } catch (PDOException \$e) { exit(1); }" > /dev/null 2>&1; do
-        echo "   ... DB non ancora raggiungibile, riprovo tra 3 secondi."
-        sleep 3
-    done
-    echo "✅ Database connesso!"
-}
-
-# 1. Aspetta il DB
-wait_for_db
-
-# 2. Controlla se Joomla è già installato
-if [ -f "/var/www/html/configuration.php" ]; then
-    echo "✅ Joomla è già installato. Avvio Apache."
-else
-    echo "⚙️  Joomla non trovato. Inizio installazione..."
-
-    # Esegue l'installazione via CLI
-    php /var/www/html/installation/joomla.php install \
-        --db-type "mysql" \
-        --db-host "$JOOMLA_DB_HOST" \
-        --db-user "$JOOMLA_DB_USER" \
-        --db-pass "$JOOMLA_DB_PASSWORD" \
-        --db-name "$JOOMLA_DB_NAME" \
-        --site-name "Joomla MCP Dev" \
-        --admin-user "SuperAdmin" \
-        --admin-username "admin" \
-        --admin-password "admin" \
-        --admin-email "admin@example.com"
-
-    echo "✅ Installazione completata!"
-
-    # Rimuove la cartella di installazione
-    if [ -d "/var/www/html/installation" ]; then
-        echo "🗑️ Rimozione cartella installation..."
-        rm -rf /var/www/html/installation
-    fi
+if [ ! -f /var/www/html/configuration.php ]; then
+  echo "🚀 Installazione Joomla in corso..."
+  php /var/www/html/installation/joomla.php install \
+    --db-host="db" --db-user="joomla_user" --db-pass="joomla_password" \
+    --db-name="joomla_db" --db-type="mysqli" \
+    --site-name="Joomla-MCP-Dev" \
+    --admin-user="admin" --admin-username="admin" --admin-password="admin_password" \
+    --admin-email="admin@example.com"
+  
+  rm -rf /var/www/html/installation
+  echo "✅ Joomla installato!"
 fi
 
-# 3. Avvia Apache
+# FONDAMENTALE: Avvia Apache e resta in ascolto (evita il 502)
 exec apache2-foreground

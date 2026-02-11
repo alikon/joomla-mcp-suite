@@ -22,25 +22,27 @@ services:
     depends_on:
       - db
     entrypoint: ["bash", "/usr/local/bin/auto_install.sh"]
-    
 
   mcp-server:
     build: 
       context: ..
-      dockerfile: mcp-server/Dockerfile # Assicurati che il Dockerfile sia qui
+      dockerfile: mcp-server/Dockerfile
     environment:
       DB_HOST: db
       DB_USER: joomla_user
       DB_PASSWORD: joomla_password
       DB_NAME: joomla_db
-      DB_PREFIX: "joos_"
+      DB_PREFIX: "jos_" # Joomla di solito usa jos_ o quello che definisci
       JOOMLA_API_BASE: "http://joomla/api/index.php/v1"
+      JOOMLA_API_TOKEN: "IL_TUO_TOKEN_QUI" # Non dimenticare di generarlo in Joomla
     volumes:
-      - ..:/workspaces/${localWorkspaceFolderBasename}:cached
+      - ..:/workspaces/joomla-mcp-suite:cached
       - joomla_files:/var/www/html
     command: sleep infinity
     stdin_open: true
     tty: true
+    depends_on:
+      - joomla
 
 volumes:
   joomla_files:
