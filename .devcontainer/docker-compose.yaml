@@ -21,7 +21,7 @@ services:
       - ./scripts/auto_install.sh:/usr/local/bin/auto_install.sh
     depends_on:
       - db
-    entrypoint: ["bash", "/usr/local/bin/auto_install.sh"]
+    command: ["bash", "/usr/local/bin/auto_install.sh"]
 
   mcp-server:
     build: 
