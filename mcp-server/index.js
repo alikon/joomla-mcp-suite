@@ -88,7 +88,6 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
                 required: ["relative_path", "content"]
             }
         },
-        ,
         // --- NUOVI TOOLS (API WEB SERVICES) ---
         {
             name: "api_lista_articoli",
