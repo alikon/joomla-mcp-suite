@@ -5,6 +5,7 @@
   "workspaceFolder": "/workspaces/joomla-mcp-suite",
 
   "forwardPorts": [8080],
+  "postCreateCommand": "chmod +x scripts/auto_install.sh",
 
   "customizations": {
     "vscode": {
