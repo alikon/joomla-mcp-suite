@@ -1,14 +1,26 @@
 {
-  "name": "Joomla MCP Development",
+  "name": "Joomla MCP Suite",
   "dockerComposeFile": "docker-compose.yaml",
   "service": "mcp-server",
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
-  "forwardPorts": [8080],
-  "portsAttributes": {
-    "8080": {
-      "label": "Sito Joomla",
-      "onAutoForward": "notify"
+
+  "features": {
+    // Questa feature abilita Docker-outside-of-Docker
+    // Ti permette di usare il comando 'docker' dal terminale per vedere gli altri container
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "version": "latest",
+      "enableNonRootDocker": "true"
     }
   },
-  "postCreateCommand": "cd mcp-server && npm install"
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-azuretools.vscode-docker",
+        "ms-vscode-remote.remote-containers"
+      ]
+    }
+  },
+
+  "remoteUser": "root"
 }
