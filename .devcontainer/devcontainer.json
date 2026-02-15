@@ -5,7 +5,13 @@
   "workspaceFolder": "/workspaces/joomla-mcp-suite",
 
   "forwardPorts": [8080],
-  "postCreateCommand": "chmod +x scripts/auto_install.sh",
+  "portsAttributes": {
+    "8080": {
+      "label": "Joomla",
+      "onAutoForward": "notify"
+    }
+  },
+  "postCreateCommand": "chmod +x scripts/auto_install.sh && echo 'JOOMLA_API_TOKEN=your_token_here' > .env",
 
   "customizations": {
     "vscode": {

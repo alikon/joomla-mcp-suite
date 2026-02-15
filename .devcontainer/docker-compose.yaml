@@ -39,7 +39,7 @@ services:
       DB_NAME: joomla_db
       DB_PREFIX: "jos_" # Joomla di solito usa jos_ o quello che definisci
       JOOMLA_API_BASE: "http://joomla/api/index.php/v1"
-      JOOMLA_API_TOKEN: "IL_TUO_TOKEN_QUI" # Non dimenticare di generarlo in Joomla
+      JOOMLA_API_TOKEN: "${JOOMLA_API_TOKEN:-your_token_here}"
     volumes:
       - ..:/workspaces/joomla-mcp-suite:cached
       - joomla_files:/var/www/html
