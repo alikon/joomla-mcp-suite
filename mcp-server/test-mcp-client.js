@@ -31,4 +31,12 @@ try {
     console.error("API Error:", e.message);
 }
 
+// Test file read
+try {
+    const fileResult = await client.callTool({ name: "file_leggi", arguments: { relative_path: "configuration.php" } });
+    console.log("File Result:", fileResult);
+} catch (e) {
+    console.error("File Error:", e.message);
+}
+
 await client.close();
