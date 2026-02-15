@@ -31,6 +31,8 @@ services:
     build: ./mcp-server
     container_name: joomla_mcp
     restart: always
+    ports:
+      - "6274:6274"
     environment:
       DB_HOST: db
       DB_USER: joomla_user
