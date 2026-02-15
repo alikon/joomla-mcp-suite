@@ -1,119 +1,287 @@
-# joomla-mcp-suite
-joomla mcp tools
-Here’s an overview of what this MCP does and how to use it.
+# Joomla MCP Suite
 
-What this MCP is
-This project is a Joomla MCP (Model Context Protocol) server that lets an AI agent safely interact with a Joomla site running in Docker.
+A Model Context Protocol (MCP) server that enables AI agents to safely interact with a Joomla site running in Docker.
 
-In practice, it:
+## What is this?
 
-Spins up a Joomla site (joomla service) with a MySQL DB.
-Spins up a backend service (mcp-server) that:
-Connects to the Joomla database.
-Reads/writes your Joomla codebase (via the ./joomla_html volume).
-Calls Joomla’s web API (/api/index.php/v1) using an API token.
-Exposes MCP tools so an AI client (like a compatible IDE / LLM environment) can:
-Inspect Joomla configuration, database, users, content.
-Read and modify PHP / template / plugin files.
-Trigger Joomla API operations (CRUD on articles, users, etc.).
-Do all that through a controlled interface, instead of arbitrary remote code execution.
-Think of it as a bridge between an AI and your local Joomla instance.
+This project provides a bridge between AI assistants (like Claude Desktop) and a local Joomla instance, allowing the AI to:
 
-How it works (high level)
-Docker services (from docker-compose.yml):
+- Read and list Joomla articles from the database
+- Create and modify articles via Joomla's REST API
+- Read and write files in the Joomla installation
+- Execute safe database queries
+- Manage Joomla content through controlled MCP tools
 
-db: MySQL container holding the Joomla database.
-joomla: Official Joomla container:
-Uses ./joomla_html as document root.
-Exposes port 8080 → http://localhost:8080.
-mcp-server: Custom container:
-Built from ./mcp-server.
-Uses DB credentials to access Joomla DB.
-Mounts the same ./joomla_html folder so it can read/write Joomla files.
-Uses:
-JOOMLA_API_TOKEN to authenticate to Joomla REST API.
-JOOMLA_API_BASE (default http://localhost:8080/api/index.php/v1) for API calls.
-How to set it up and run it
-1. Create .env with a temporary token value
-In the project root (/home/alikon/Desktop/joomla-mcp/joomla-mcp-suite), create .env:
+## Architecture
 
-JOOMLA_API_TOKEN=PLACEHOLDER
-You will replace this with a real token later; this just removes the warning and lets containers start.
+The project consists of three Docker services:
 
-Make sure your .gitignore ignores .env if you don’t want to commit secrets.
+- **db**: MySQL 8.0 database for Joomla
+- **joomla**: Official Joomla container (accessible at http://localhost:8080)
+- **mcp-server**: Node.js MCP server that connects to both the database and Joomla API
 
-2. Start the stack
-From the root folder:
+## Prerequisites
 
+- Docker and Docker Compose installed
+- Node.js 18+ (for local testing)
+- A compatible MCP client (e.g., Claude Desktop)
+
+## Setup Instructions
+
+### 1. Clone the Repository
+
+```bash
+git clone <repository-url>
+cd joomla-mcp-suite
+```
+
+### 2. Create Environment File
+
+Create a `.env` file in the project root:
+
+```bash
+echo "JOOMLA_API_TOKEN=your_token_here" > .env
+```
+
+(You'll update this with a real token after Joomla installation)
+
+### 3. Start the Docker Stack
+
+```bash
 docker compose up -d
+```
+
 This will start:
+- MySQL database on internal network
+- Joomla site on http://localhost:8080
+- MCP server container
 
-MySQL (joomla_db)
-Joomla (joomla_site on port 8080)
-MCP server (joomla_mcp)
-3. Install Joomla
-Open your browser at:
+### 4. Install Joomla
 
-http://localhost:8080
-Go through the normal Joomla installer:
+1. Open your browser at http://localhost:8080
+2. Complete the Joomla installation wizard:
+   - Set site name, admin username, and password
+   - Database configuration (should auto-fill):
+     - Host: `db`
+     - Database: `joomla_db`
+     - Username: `joomla_user`
+     - Password: `joomla_password`
+3. Complete the installation
 
-Site name, admin user, password, etc.
-DB settings should already be correct if using the default docker-compose.yml:
-Host: db
-DB: joomla_db
-User: joomla_user
-Password: joomla_password
-Once the installation is finished, you have a working Joomla site.
+### 5. Generate Joomla API Token
 
-4. Generate a Joomla API token
-Depending on your Joomla version and setup, you typically:
+1. Log in to Joomla admin: http://localhost:8080/administrator
+2. Navigate to **System → Manage → API Tokens** (or User profile → API Token)
+3. Create a new API token
+4. Copy the generated token
 
-Log in to the Joomla admin: http://localhost:8080/administrator
-Go to the section where you can generate API tokens, e.g.:
-For Joomla 4 core web services:
-User profile → “API Token” tab (or similar).
-Or any plugin/extension you’ve installed that issues API tokens.
-Generate an API token and copy it.
-5. Update .env with the real token
-Edit .env:
+### 6. Update Environment File
 
-JOOMLA_API_TOKEN=THE_REAL_TOKEN_YOU_JUST_GENERATED
-Then restart only the MCP server so it loads the new token:
+Edit `.env` with your real API token:
 
-docker compose up -d mcp-server
-How to use the MCP from an AI client
-The exact steps depend on your AI client (IDE plugin, CLI, or LLM environment) and how it integrates MCP servers, but conceptually:
+```bash
+JOOMLA_API_TOKEN=your_actual_token_here
+```
 
-Configure the client to connect to the mcp-server (usually via a URL or local port exposed by the container).
-The client discovers MCP tools exposed by the server, e.g.:
-joomla.listArticles
-joomla.getArticle
-joomla.updateFile (for editing PHP/template files in joomla_html)
-joomla.runQuery (for safe DB queries)
-In your AI client, you can then ask things like:
-“List all published articles.”
-“Create a new article in category X.”
-“Edit the index.php of the current template to add a custom header.”
-“Check why this plugin is failing and fix the error.”
-The AI will call these MCP tools under the hood, using:
+Restart the MCP server to load the new token:
 
-The Joomla REST API (secured by JOOMLA_API_TOKEN).
-Direct DB access (with the DB env vars).
-File system access via the ./joomla_html volume.
-Typical workflow example
-Start everything:
+```bash
+docker compose restart mcp-server
+```
 
+## Available MCP Tools
+
+The server exposes the following tools:
+
+### Database Tools
+
+- **db_leggi_articoli**: Read articles from database
+  - Parameters: `limit` (number, default: 5)
+  
+- **db_crea_articolo**: Create article via direct database insert
+  - Parameters: `title` (string), `introtext` (string), `alias` (optional), `catid` (number, default: 2)
+
+### File System Tools
+
+- **file_leggi**: Read a file from Joomla installation
+  - Parameters: `relative_path` (string)
+  
+- **file_scrivi**: Write/overwrite a file in Joomla installation
+  - Parameters: `relative_path` (string), `content` (string)
+
+### API Tools
+
+- **api_lista_articoli**: List articles using Joomla REST API
+  - Parameters: none
+  
+- **api_crea_articolo**: Create article via Joomla REST API
+  - Parameters: `title` (string), `articletext` (string), `catid` (number, default: 2), `language` (string, default: "*")
+  
+- **api_modifica_articolo**: Update an existing article
+  - Parameters: `id` (string), `title` (string), `articletext` (string)
+
+## Testing the MCP Server
+
+### Run All Tests
+
+```bash
+docker exec -it joomla_mcp node test-all-tools.js
+```
+
+This will test all available tools and display a summary report.
+
+### Test Individual Components
+
+Test database connection:
+```bash
+docker exec -it joomla_mcp node test-db.js
+```
+
+Test API connection:
+```bash
+docker exec -it joomla_mcp node test-api.js
+```
+
+Test MCP client:
+```bash
+docker exec -it joomla_mcp node test-mcp-client.js
+```
+
+## Connecting to Claude Desktop
+
+Add this configuration to your Claude Desktop config file:
+
+**Linux/macOS**: `~/.config/Claude/claude_desktop_config.json`
+**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "joomla-master": {
+      "command": "docker",
+      "args": ["exec", "-i", "joomla_mcp", "node", "index.js"]
+    }
+  }
+}
+```
+
+Restart Claude Desktop to load the MCP server.
+
+## Using with GitHub Codespaces
+
+The project includes a `.devcontainer` configuration for GitHub Codespaces:
+
+1. Open the repository in Codespaces
+2. The environment will automatically set up
+3. Access Joomla via the forwarded port 8080
+4. Follow steps 4-6 from the setup instructions
+
+## Project Structure
+
+```
+joomla-mcp-suite/
+├── .devcontainer/          # Codespaces configuration
+│   ├── devcontainer.json
+│   └── docker-compose.yaml
+├── mcp-server/             # MCP server implementation
+│   ├── Dockerfile
+│   ├── index.js            # Main MCP server
+│   ├── package.json
+│   ├── test-all-tools.js   # Comprehensive test suite
+│   ├── test-api.js         # API connectivity test
+│   ├── test-db.js          # Database connectivity test
+│   └── test-mcp-client.js  # MCP client test
+├── scripts/
+│   └── auto_install.sh     # Joomla auto-install script
+├── docker-compose.yml      # Main Docker configuration
+├── .env                    # Environment variables (create this)
+├── .gitignore
+└── README.md
+```
+
+## Environment Variables
+
+The MCP server uses these environment variables:
+
+- `DB_HOST`: Database host (default: `db`)
+- `DB_USER`: Database user (default: `joomla_user`)
+- `DB_PASSWORD`: Database password (default: `joomla_password`)
+- `DB_NAME`: Database name (default: `joomla_db`)
+- `DB_PREFIX`: Table prefix (default: `joos_`)
+- `JOOMLA_API_TOKEN`: Your Joomla API token
+- `JOOMLA_API_BASE`: API base URL (default: `http://joomla/api/index.php/v1`)
+
+## Troubleshooting
+
+### Port 8080 already in use
+
+Change the port mapping in `docker-compose.yml`:
+```yaml
+ports:
+  - "8081:80"  # Use 8081 instead
+```
+
+### MCP server can't connect to database
+
+Check if all containers are running:
+```bash
+docker ps
+```
+
+Restart the stack:
+```bash
+docker compose down
 docker compose up -d
-Install Joomla and generate API token.
+```
 
-Put the token into .env and restart mcp-server.
+### API calls fail
 
-Connect your AI client to the MCP server.
+1. Verify the API token is set correctly in `.env`
+2. Check that Joomla API is enabled in Joomla admin
+3. Restart the MCP server after updating the token
 
-Ask the AI to:
+### Test failures
 
-Inspect Joomla content.
-Propose code changes (e.g. create a module, modify a plugin).
-Apply those changes through MCP tools (the AI edits files and uses the Joomla API safely).
-If you tell me which AI client/tool you plan to use (e.g. specific IDE extension or LLM interface), I can give you concrete configuration steps for connecting it to this MCP server.
+View detailed logs:
+```bash
+docker logs joomla_mcp
+docker logs joomla_site
+docker logs joomla_db
+```
 
+## Development
+
+### Rebuild MCP Server
+
+After making changes to the MCP server code:
+
+```bash
+docker compose up -d --build mcp-server
+```
+
+### Access Container Shell
+
+```bash
+docker exec -it joomla_mcp sh
+```
+
+### View Logs
+
+```bash
+docker compose logs -f mcp-server
+```
+
+## Security Notes
+
+- The `.env` file contains sensitive information and is excluded from git
+- API tokens should be kept secure and rotated regularly
+- The MCP server has full access to the Joomla database and files
+- Only use this setup in development environments
+
+## License
+
+[Your License Here]
+
+## Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request.
