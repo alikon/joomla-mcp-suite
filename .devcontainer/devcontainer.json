@@ -11,7 +11,7 @@
       "onAutoForward": "notify"
     }
   },
-  "postCreateCommand": "chmod +x scripts/auto_install.sh && echo 'JOOMLA_API_TOKEN=your_token_here' > .env",
+  "postCreateCommand": "cd mcp-server && npm install && cd .. && chmod +x scripts/auto_install.sh && echo 'JOOMLA_API_TOKEN=your_token_here' > .env",
 
   "customizations": {
     "vscode": {

@@ -29,15 +29,14 @@ services:
     command: ["bash", "/usr/local/bin/auto_install.sh"]
 
   mcp-server:
-    build: 
-      context: ..
-      dockerfile: mcp-server/Dockerfile
+    image: node:18-slim
+    working_dir: /workspaces/joomla-mcp-suite
     environment:
       DB_HOST: db
       DB_USER: joomla_user
       DB_PASSWORD: joomla_password
       DB_NAME: joomla_db
-      DB_PREFIX: "jos_" # Joomla di solito usa jos_ o quello che definisci
+      DB_PREFIX: "jos_"
       JOOMLA_API_BASE: "http://joomla/api/index.php/v1"
       JOOMLA_API_TOKEN: "${JOOMLA_API_TOKEN:-your_token_here}"
     volumes:
