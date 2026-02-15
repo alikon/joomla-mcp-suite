@@ -136,7 +136,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 return { content: [{ type: "text", text: JSON.stringify(articles, null, 2) }] };
 
             case "db_crea_articolo":
-                const sql = `INSERT INTO ${prefix}content (title, alias, introtext, catid, state, language, created) VALUES (?, ?, ?, ?, 1, '*', NOW())`;
+                const sql = `INSERT INTO ${prefix}content (title, alias, introtext, \`fulltext\`, catid, state, language, created, modified, images, urls, attribs, metadata, metakey, metadesc) VALUES (?, ?, ?, '', ?, 1, '*', NOW(), NOW(), '', '', '', '', '', '')`;
                 const [res] = await pool.execute(sql, [args.title, args.alias || args.title.toLowerCase().replace(/ /g, '-'), args.introtext, String(args.catid)]);
                 return { content: [{ type: "text", text: `Articolo creato con ID: ${res.insertId}` }] };
 
@@ -160,7 +160,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                     title: args.title,
                     articletext: args.articletext,
                     catid: args.catid,
-                    language: args.language,
+                    language: args.language || "*",
                     state: 1
                 });
                 return { content: [{ type: "text", text: `Articolo creato con successo! ID: ${newArt.data.id}` }] };
