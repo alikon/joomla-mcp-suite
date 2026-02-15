@@ -16,7 +16,19 @@ const tools = await client.listTools();
 console.log("Available tools:", tools);
 
 // Call a tool
-const result = await client.callTool({ name: "db_leggi_articoli", arguments: { limit: 3 } });
-console.log("Result:", result);
+try {
+    const result = await client.callTool({ name: "db_leggi_articoli", arguments: { limit: 3 } });
+    console.log("Result:", result);
+} catch (e) {
+    console.error("DB Error:", e.message);
+}
+
+// Test API call
+try {
+    const apiResult = await client.callTool({ name: "api_lista_articoli", arguments: {} });
+    console.log("API Result:", apiResult);
+} catch (e) {
+    console.error("API Error:", e.message);
+}
 
 await client.close();

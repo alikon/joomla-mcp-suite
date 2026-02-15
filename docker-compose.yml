@@ -37,7 +37,7 @@ services:
       DB_PASSWORD: joomla_password
       DB_NAME: joomla_db
       DB_PREFIX: "joos_"
-      JOOMLA_API_TOKEN: "IL_TUO_TOKEN_QUI" # Incolla qui il token generato
+      JOOMLA_API_TOKEN: "${JOOMLA_API_TOKEN}" # Preso dal file .env
       JOOMLA_API_BASE: "http://joomla/api/index.php/v1" # Host interno Docker
     volumes:
       - ./joomla_html:/var/www/html # Permette all'IA di leggere/scrivere file
