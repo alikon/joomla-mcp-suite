@@ -22,11 +22,9 @@ services:
       JOOMLA_DB_NAME: joomla_db
     volumes:
       - joomla_files:/var/www/html
-      - ./scripts/auto_install.sh:/usr/local/bin/auto_install.sh
     depends_on:
       db:
         condition: service_healthy
-    command: ["bash", "/usr/local/bin/auto_install.sh"]
 
   mcp-server:
     image: node:18-slim

@@ -4,6 +4,10 @@
   "service": "mcp-server",
   "workspaceFolder": "/workspaces/joomla-mcp-suite",
 
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+
   "forwardPorts": [8080],
   "portsAttributes": {
     "8080": {
