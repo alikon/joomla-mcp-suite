@@ -86,7 +86,7 @@ JOOMLA_API_TOKEN=your_actual_token_here
 Restart the MCP server to load the new token:
 
 ```bash
-docker compose restart mcp-server
+docker-compose up -d --force-recreate mcp-server
 ```
 
 ## Available MCP Tools

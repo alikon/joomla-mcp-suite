@@ -1,10 +1,6 @@
-FROM node:18-slim
+FROM node:20-alpine
 WORKDIR /app
-
-COPY package.json ./
+COPY package*.json ./
 RUN npm install
-
-COPY *.js ./
-
-# Questo comando viene ignorato se nel docker-compose c'è "command: sleep infinity"
+COPY . .
 CMD ["node", "index.js"]

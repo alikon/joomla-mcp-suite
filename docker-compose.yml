@@ -16,14 +16,12 @@ services:
     container_name: joomla_site
     restart: always
     ports:
-      - "8080:80"
+      - "8082:80"
     environment:
       JOOMLA_DB_HOST: db
       JOOMLA_DB_USER: joomla_user
       JOOMLA_DB_PASSWORD: joomla_password
       JOOMLA_DB_NAME: joomla_db
-    volumes:
-      - ./joomla_html:/var/www/html
     depends_on:
       - db
 
@@ -46,7 +44,20 @@ services:
     depends_on:
       - db
     stdin_open: true
-    tty: true
+    ## tty: true
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: joomla_phpmyadmin
+    restart: always
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_USER: joomla_user
+      PMA_PASSWORD: joomla_password
+    depends_on:
+      - db
 
 volumes:
   db_data:

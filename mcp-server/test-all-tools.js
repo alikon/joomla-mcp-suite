@@ -72,7 +72,7 @@ console.log("\n=== TEST 4: file_leggi ===");
 try {
     const result = await client.callTool({ 
         name: "file_leggi", 
-        arguments: { relative_path: "configuration.php" } 
+        arguments: { relative_path: "LICENSE.txt" } 
     });
     if (result.isError) {
         console.error("✗ Error:", result.content[0].text);
